@@ -66,7 +66,7 @@ namespace EggIncubator
         {
             Image res = new Bitmap(panel1.Width, panel1.Height);
             using (Graphics g = Graphics.FromImage(res))
-                g.DrawImage(original, rect, 0, 0, panel1.Width, panel1.Height, GraphicsUnit.Pixel);
+                g.DrawImage(original, rect.X, rect.Y, rect.Width, rect.Height);
             Done?.Invoke(res);
         }
     }
