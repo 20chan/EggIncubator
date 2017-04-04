@@ -13,6 +13,8 @@ namespace EggIncubator
 {
     public partial class Form1 : Form
     {
+        enum State { Solid, Linear, Image };
+        State current = State.Solid;
         Image Egg;
         Graphics graphics;
 
@@ -52,16 +54,30 @@ namespace EggIncubator
         
         private void DrawSolidBg()
         {
-            graphics.FillRectangle(solid, 0, 0, canvas.Width, canvas.Height);
+            DrawBg(solid);
         }
 
         private void DrawLinearGradientBg()
         {
             DrawBg(linearBrush);
         }
+
+        private void DrawImageBg()
+        {
+            graphics.DrawImage(background, 0, 0, canvas.Width, canvas.Height);
+        }
+
         private void canvas_Paint(object sender, PaintEventArgs e)
         {
-            DrawSolidBg();
+            switch(current)
+            {
+                case State.Solid:
+                    DrawSolidBg();
+                    break;
+                case State.Image:
+                    DrawImageBg();
+                    break;
+            }
             DrawEgg();
 
             canvasGraphics.DrawImage(buffer, 0, 0, canvas.Width, canvas.Height);
@@ -79,8 +95,8 @@ namespace EggIncubator
 
         private void SetSolidColor(Color c)
         {
+            current = State.Solid;
             this.button1.BackColor= Color.FromArgb(255, c.R, c.G, c.B);
-            
             //this.textBox1.BackColor = Color.FromArgb(255 - c.R, 255 - c.G, 255 - c.B);
             this.textBox1.Text = "#" + c.R.ToString("X2") + c.G.ToString("X2") + c.B.ToString("X2");
             canvas.Invalidate();
@@ -103,6 +119,13 @@ namespace EggIncubator
             if (dialog.ShowDialog() == DialogResult.OK)
             {
                 ImageEditor editor = new ImageEditor(Image.FromFile(dialog.FileName));
+                editor.Done += (img) =>
+                     {
+                         current = State.Image;
+                         background = img;
+                         editor.Close();
+                         canvas.Invalidate();
+                     };
                 editor.Show();
             }
         }

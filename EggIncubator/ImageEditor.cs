@@ -12,6 +12,8 @@ namespace EggIncubator
 {
     public partial class ImageEditor : Form
     {
+        public event Action<Image> Done;
+
         Image original;
         Rectangle rect;
         Graphics g;
@@ -22,7 +24,7 @@ namespace EggIncubator
             panel1.MouseWheel += Panel1_MouseWheel;
             this.DoubleBuffered = true;
             g = panel1.CreateGraphics();
-            rect = new Rectangle(0, 0, panel1.Width, panel1.Height);
+            rect = new Rectangle(0, 0, original.Width, original.Height);
         }
 
         private void Panel1_MouseWheel(object sender, MouseEventArgs e)
@@ -42,9 +44,7 @@ namespace EggIncubator
         Point last = new Point();
         private void panel1_MouseDown(object sender, MouseEventArgs e)
         {
-            if(last.IsEmpty)
-                last = Cursor.Position;
-            this.Text = last.X.ToString();
+            last = Cursor.Position;
         }
 
         private void panel1_MouseMove(object sender, MouseEventArgs e)
@@ -60,6 +60,14 @@ namespace EggIncubator
         private void panel1_MouseUp(object sender, MouseEventArgs e)
         {
             last = Point.Empty;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            Image res = new Bitmap(panel1.Width, panel1.Height);
+            using (Graphics g = Graphics.FromImage(res))
+                g.DrawImage(original, rect, 0, 0, panel1.Width, panel1.Height, GraphicsUnit.Pixel);
+            Done?.Invoke(res);
         }
     }
 }
